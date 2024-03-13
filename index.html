@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diamond Race</title>
+    <style>
+        #title {
+            position: absolute;
+            top: 100px;
+            color: black;
+            font-size: 22px;
+            left: 50%;
+        }
+        .line {
+            width: 2px;
+            height: 260px;
+            top: 200px;
+            background-color: black;
+            position: absolute;
+        } /* The style of the startline and the endline */
+
+        #startLine {
+            left: 100px;
+        }
+        #endLine {
+            left: 600px;
+        } /* Positions of the two lines*/
+
+        .label {
+            position: absolute;
+            top: 180px;
+            color: black; 
+            font-size: 16px; 
+        } /* The labels of the two lines, which are "Start" and "End"*/
+
+        .diamond {
+            width: 50px;
+            height: 50px;
+            border: none;
+            position: absolute;
+            left: 75px;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        }
+
+        #reset {
+            position: absolute;
+            width: 50px;
+            left: 900px;
+            top: 160px;
+            background-color: gainsboro;
+            border-color: black;
+        } /* Reset button*/
+
+        .board-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            position: relative;
+            top: 200px;
+            left: 900px;
+            margin-top: 20px;
+        }
+        .board-line {
+            width: 70px;
+            height: 10px;
+            margin-right: 10px;
+        }
+        .board-score {
+            font-size: 20px;
+        } /* Classes of the score board*/
+    </style>
+</head>
+<body>
+    <div id="title">Diamond Race</div>
+
+    <!--Race Track-->
+    <div class="label" style="left: 85px;">Start</div> 
+    <div id="startLine" class="line"></div>
+    <div class="label" style="left: 587px;">End</div>
+    <div id="endLine" class="line"></div>
+
+    <button id="diamond1" class="diamond" onclick="diamond1.move()"></button>
+    <button id="diamond2" class="diamond" onclick="diamond2.move()"></button>
+    <button id="diamond3" class="diamond" onclick="diamond3.move()"></button>
+    <button id="diamond4" class="diamond" onclick="diamond4.move()"></button>
+
+    <button id="reset" onclick="reset()">Reset</button>
+    
+    <!--Score Board-->
+    <div class="board-item">
+        <div class="board-line" style="background-color: blue;"></div>
+        <div class="board-score" id="score1"></div>
+    </div>
+    <div class="board-item">
+        <div class="board-line" style="background-color: green;"></div>
+        <div class="board-score" id="score2"></div>
+    </div>
+    <div class="board-item">
+        <div class="board-line" style="background-color: red;"></div>
+        <div class="board-score" id="score3"></div>
+    </div>
+    <div class="board-item">
+        <div class="board-line" style="background-color: yellow;"></div>
+        <div class="board-score" id="score4"></div>
+    </div>
+
+    <script>
+        var winFlag = 0; //Global variable to monitor if there is a winner.
+        //Since in this logic, there can only be one winner in each game, it‘s impossible to win at the same time. Thus, using a global variable might be a concise way to control the movement of all the diamonds.
+
+        class Diamond {
+            constructor(color, diamond, top, scoreID) {
+                this.diamond = document.getElementById(diamond);
+                this.scoreID = document.getElementById(scoreID);
+                this.diamond.style.backgroundColor = color;
+                this.diamond.style.top = top;
+                this.distance = 50; //The step size that the diamond moves forward when clicked
+                this.score = 0;
+                this.updateScore(); //A function to update the display of the scoreboard
+            }
+        
+            move() {
+                const Style = window.getComputedStyle(this.diamond);
+                const Pos = parseInt(Style.left, 10); // Current position of the diamond
+                const endLineStyle = window.getComputedStyle(document.getElementById('endLine'));
+                const endPos = parseInt(endLineStyle.left, 10); // Final position
+
+                if (this.score < 9 && winFlag == 0) { // According to the design, a diamond takes ten steps to reach the endline
+                    this.diamond.style.left = (Pos + this.distance) + 'px';
+                    this.score++;
+                } else if (this.score == 9 && winFlag == 0) { // The final step. In order to make it end exactly on the endline
+                    this.diamond.style.left = (endPos - 25) + 'px';
+                    this.score++;
+                    winFlag = 1; // This is when the winner is generated, so no one should move anymore
+                }
+
+                this.updateScore();
+            }
+
+            updateScore() {
+                if (this.score==10){
+                    this.scoreID.style.color = "red"; // The winner's score turns red
+                } else {
+                    this.scoreID.style.color = "black";
+                }
+                this.scoreID.textContent = this.score;
+            }
+        }
+        
+        const diamond1 = new Diamond('blue', 'diamond1', '210px', 'score1');
+        const diamond2 = new Diamond('green', 'diamond2', '270px', 'score2');
+        const diamond3 = new Diamond('red', 'diamond3', '330px', 'score3');
+        const diamond4 = new Diamond('yellow', 'diamond4', '390px', 'score4');
+        
+        function reset(){
+            winFlag = 0;
+            [diamond1, diamond2, diamond3, diamond4].forEach(diamond => {
+                diamond.score = 0;
+                diamond.diamond.style.left = '75px';
+                diamond.updateScore();
+            });
+        }
+        </script>
+</body>
